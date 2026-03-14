@@ -2,7 +2,9 @@ import pymupdf
 from pathlib import Path
 from dotenv import load_dotenv
 import chromadb
-#load_dotenv()
+import sys
+from anthropic import Anthropic
+load_dotenv()
 
 def extract_text_from_pdf(pdf_path):
     doc = pymupdf.open(pdf_path)
@@ -24,12 +26,14 @@ def simple_chunking(text):
     
     return chunks
 
-def add_chunks_to_collection(collection, file_name, chunks):
+def add_chunks_to_collection(collection, file_name, chunks, verbose = False):
     
-    print(f"Putting text extracted from s{file_name} into database")
+    if verbose:
+        print(f"Putting text extracted from s{file_name} into database")
     existing = collection.get(where={"source":file_name})
     if len(existing["ids"]) > 0:
-        print(f"Skipping {file_name}, already in database")
+        if verbose:
+            print(f"Skipping {file_name}, already in database")
         return
     
     ids = [f"{file_name}_{i}" for i in range(len(chunks))]
@@ -59,4 +63,31 @@ collection = chroma_client.get_or_create_collection(name="travel_guides")
 for file_name, chunks in zip(file_names, chunked_text):
     add_chunks_to_collection(collection, file_name, chunks)
 
-peek_at_collection(collection)
+#peek_at_collection(collection)
+
+results = collection.query(query_texts=["most impressive places to visit for a tourist, a must see"],
+                           n_results=10)
+# Build context with source labels
+context_parts = []
+for doc, meta in zip(results["documents"][0], results["metadatas"][0]):
+    context_parts.append(f"[Source : {meta['source']}]\n{doc}")
+
+context = "\n\n".join(context_parts)
+
+prompt = f"""Based on the following excerpts from multiple travel guides, answer the question. Reference where the information came from.
+
+Context:
+{context}
+
+Question: {sys.argv[1]}
+"""
+#print(prompt)
+
+client = Anthropic()
+
+response = client.messages.create(model="claude-haiku-4-5-20251001",
+                                  max_tokens=1024,
+                                  messages = [{"role":"user", "content":prompt}]
+                                  )
+
+print(response.content[0].text)
