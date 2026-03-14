@@ -65,7 +65,7 @@ for file_name, chunks in zip(file_names, chunked_text):
 
 #peek_at_collection(collection)
 
-results = collection.query(query_texts=["most impressive places to visit for a tourist, a must see"],
+results = collection.query(query_texts=["best places to have a nice coffee, cafes, best coffee"],
                            n_results=10)
 # Build context with source labels
 context_parts = []
