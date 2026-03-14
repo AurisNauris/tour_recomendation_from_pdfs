@@ -209,3 +209,4 @@ __marimo__/
 # Extra
 guides/
 chroma_db/
+.DS_Store
