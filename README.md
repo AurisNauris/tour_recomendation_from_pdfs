@@ -15,6 +15,8 @@ A short project for learning about AI engineering based on using multi-source re
 1. Query from the database should always be related to the question asked by the user.
 2. Database query could be adjusted based on the user question using LLM. A few variations may be needed to get better context.
 3. Text extraction and chunking are rudimentary and could be easily improved.
+4. SAFETY - last but not least. There are no safety measures.
+5. Checks - there are not formal checks to ensure that the code is running well.
 
 # Personal take 2026-03-14
 1. Turned out to be a quite similar project to the one recently done, so worked good as a review but also there were some new elements.
